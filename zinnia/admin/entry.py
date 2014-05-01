@@ -84,9 +84,9 @@ class EntryAdmin(admin.ModelAdmin):
         """
         title = _('%(title)s (%(word_count)i words)') % \
             {'title': entry.title, 'word_count': entry.word_count}
-        reaction_count = (entry.comment_count +
-                          entry.pingback_count +
-                          entry.trackback_count)
+        reaction_count = int(entry.comment_count +
+                             entry.pingback_count +
+                             entry.trackback_count)
         if reaction_count:
             return ungettext_lazy(
                 '%(title)s (%(reactions)i reaction)',
@@ -133,7 +133,7 @@ class EntryAdmin(admin.ModelAdmin):
         """
         try:
             return ', '.join(['<a href="%s" target="blank">%s</a>' %
-                              (reverse('zinnia_tag_detail', args=[tag]), tag)
+                              (reverse('zinnia:tag_detail', args=[tag]), tag)
                               for tag in entry.tags_list])
         except NoReverseMatch:
             return entry.tags
@@ -145,7 +145,7 @@ class EntryAdmin(admin.ModelAdmin):
         Return the sites linked in HTML.
         """
         try:
-            index_url = reverse('zinnia_entry_archive_index')
+            index_url = reverse('zinnia:entry_archive_index')
         except NoReverseMatch:
             index_url = ''
         return ', '.join(
@@ -187,7 +187,7 @@ class EntryAdmin(admin.ModelAdmin):
         if entry.pk and not request.user.has_perm('zinnia.can_change_author'):
             form.cleaned_data['authors'] = entry.authors.all()
 
-        if not form.cleaned_data.get('authors'):
+        if not entry.pk and not form.cleaned_data.get('authors'):
             form.cleaned_data['authors'] = Author.objects.filter(
                 pk=request.user.pk)
 
